@@ -1,8 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:get_it/get_it.dart';
 
 // Widgets
 import '../widgets/custom_input_fields.dart';
 import '../widgets/rounded_button.dart';
+
+// Providers
+import '../providers/authentication_provider.dart';
+
+// Services
+import '../services/navigation_service.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -15,12 +23,20 @@ class _LoginPageState extends State<LoginPage> {
   late double _deviceHeight;
   late double _deviceWidth;
 
+  late AuthenticationProvider _auth;
+  late NavigationService _navigation;
+
   final _loginFormKey = GlobalKey<FormState>();
+
+  String? _email;
+  String? _password;
 
   @override
   Widget build(BuildContext context) {
     _deviceHeight = MediaQuery.of(context).size.height;
     _deviceWidth = MediaQuery.of(context).size.width;
+    _auth = Provider.of<AuthenticationProvider>(context);
+    _navigation = GetIt.instance.get<NavigationService>();
     return _buildUI();
   }
 
@@ -77,15 +93,23 @@ class _LoginPageState extends State<LoginPage> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             CustomTextFormFields(
-              onSaved: (_value) {},
+              onSaved: (_value) {
+                setState(() {
+                  _email = _value;
+                });
+              },
               regEx:
                   r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+",
               hintText: "Email",
               obscureText: false,
             ),
             CustomTextFormFields(
-              onSaved: (_value) {},
-              regEx: r".{8,}",
+              onSaved: (_value) {
+                setState(() {
+                  _password = _value;
+                });
+              },
+              regEx: r".{6,}",
               hintText: "Password",
               obscureText: true,
             )
@@ -97,10 +121,16 @@ class _LoginPageState extends State<LoginPage> {
 
   Widget _loginButton() {
     return RoundedButton(
-        name: "Login",
-        height: _deviceHeight * 0.065,
-        width: _deviceWidth * 0.65,
-        onPressed: () {});
+      name: "Login",
+      height: _deviceHeight * 0.065,
+      width: _deviceWidth * 0.65,
+      onPressed: () {
+        if (_loginFormKey.currentState!.validate()) {
+          _loginFormKey.currentState!.save();
+          _auth.loginUsingEmailAndPassword(_email!, _password!);
+        }
+      },
+    );
   }
 
   Widget _registerAccountLink() {
