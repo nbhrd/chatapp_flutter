@@ -3,6 +3,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 // Widgets
 import '../widgets/rounded_image.dart';
+import '../widgets/message_bubbles.dart';
 
 // Models
 import '../models/chat_message.dart';
@@ -30,41 +31,95 @@ class CustomListViewTilesWithActivity extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-        onTap: () => onTap(),
-        minVerticalPadding: height * 0.20,
-        leading: RoundedImageNetworkWithStatusIndcator(
-          key: UniqueKey(),
-          imagePath: imagePath,
-          size: height / 2,
-          isActive: isActive,
+      onTap: () => onTap(),
+      minVerticalPadding: height * 0.20,
+      leading: RoundedImageNetworkWithStatusIndcator(
+        key: UniqueKey(),
+        imagePath: imagePath,
+        size: height / 2,
+        isActive: isActive,
+      ),
+      title: Text(
+        title,
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 18,
+          fontWeight: FontWeight.w500,
         ),
-        title: Text(
-          title,
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        subtitle: isActivity
-            ? Row(
-                mainAxisSize: MainAxisSize.max,
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  SpinKitThreeBounce(
-                    color: Colors.white54,
-                    size: height * 0.10,
-                  )
-                ],
-              )
-            : Text(
-                subtitle,
-                style: TextStyle(
+      ),
+      subtitle: isActivity
+          ? Row(
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                SpinKitThreeBounce(
                   color: Colors.white54,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w400,
+                  size: height * 0.10,
+                )
+              ],
+            )
+          : Text(
+              subtitle,
+              style: TextStyle(
+                color: Colors.white54,
+                fontSize: 12,
+                fontWeight: FontWeight.w400,
+              ),
+            ),
+    );
+  }
+}
+
+class CustomChatListViewTile extends StatelessWidget {
+  final double width;
+  final double deviceHeight;
+  final bool isOwnMessage;
+  final ChatMessage message;
+  final ChatUser sender;
+
+  CustomChatListViewTile({
+    required this.width,
+    required this.deviceHeight,
+    required this.isOwnMessage,
+    required this.message,
+    required this.sender,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.only(bottom: 10),
+      width: width,
+      child: Row(
+        mainAxisSize: MainAxisSize.max,
+        mainAxisAlignment:
+            isOwnMessage ? MainAxisAlignment.end : MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          !isOwnMessage
+              ? RoundedImageNetwork(
+                  key: UniqueKey(),
+                  imagePath: sender.imageURL,
+                  size: width * 0.08)
+              : Container(),
+          SizedBox(
+            width: width * 0.05,
+          ),
+          message.type == MessageType.TEXT
+              ? TextMessageBubble(
+                  isOwnMessage: isOwnMessage,
+                  message: message,
+                  height: deviceHeight * 0.06,
+                  width: width)
+              : ImageMessageBubble(
+                  isOwnMessage: isOwnMessage,
+                  message: message,
+                  height: deviceHeight * 0.30,
+                  width: width * 0.55,
                 ),
-              ));
+        ],
+      ),
+    );
   }
 }
